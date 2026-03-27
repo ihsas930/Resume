@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazal Rahman – Geospatial CV</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Left CV panel */
+        .cv-panel {
+            width: 40%;
+            background: #f8f9fa;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+            z-index: 1;
+        }
+        /* Right map panel */
+        .map-panel {
+            width: 60%;
+            position: relative;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        /* CV content styling */
+        .cv-section {
+            margin-bottom: 2rem;
+        }
+        .cv-section h2 {
+            font-size: 1.5rem;
+            border-left: 4px solid #2ecc71;
+            padding-left: 0.8rem;
+            margin-bottom: 1rem;
+            color: #1e4663;
+        }
+        .cv-item {
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        .cv-item:hover {
+            background: #e9ecef;
+        }
+        .cv-item h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            color: #2c3e50;
+        }
+        .cv-item .meta {
+            font-size: 0.85rem;
+            color: #5d6d7e;
+            margin-bottom: 0.3rem;
+        }
+        .cv-item p {
+            font-size: 0.9rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .skills span {
+            background: #e9ecef;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .contact-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .contact-info p {
+            margin: 0.3rem 0;
+            font-size: 0.85rem;
+        }
+        hr {
+            margin: 1rem 0;
+            border-color: #dee2e6;
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .cv-panel, .map-panel { width: 100%; height: 50vh; }
+            .cv-panel { overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cv-panel">
+    <div class="contact-info">
+        <h1 style="margin-bottom: 0.2rem;">Fazal Rahman</h1>
+        <p><strong>Environmental Engineer | GIS & AI Specialist</strong></p>
+        <p>📍 Adana, Turkey | 📞 (+90) 5063368162 | 📧 ihsas930@gmail.com</p>
+        <p>🔗 <a href="https://www.linkedin.com/in/fazalrahman-ihsas-b05421364/" target="_blank">LinkedIn Profile</a></p>
+    </div>
+
+    <!-- About Me -->
+    <div class="cv-section">
+        <h2>📌 About Me</h2>
+        <p>I am an Environmental Engineer and PhD researcher with 5+ years of expertise in groundwater quality assessment, flow modelling, GIS, and spatial data analysis. My work integrates field data, laboratory analysis, and geospatial technologies to support environmental decision‑making. I am passionate about combining geospatial technologies, AI, and digital twin modeling to transform complex data into real‑time solutions for urban challenges.</p>
+        <p>Open to research collaborations, academic projects, and consultancy opportunities.</p>
+    </div>
+
+    <!-- Education (will be populated by JS) -->
+    <div class="cv-section" id="education-section">
+        <h2>🎓 Education</h2>
+        <div id="education-list"></div>
+    </div>
+
+    <!-- Work Experience -->
+    <div class="cv-section" id="work-section">
+        <h2>💼 Work Experience</h2>
+        <div id="work-list"></div>
+    </div>
+
+    <!-- Publications -->
+    <div class="cv-section" id="publications-section">
+        <h2>📄 Publications</h2>
+        <div id="publications-list"></div>
+    </div>
+
+    <!-- Research & Projects -->
+    <div class="cv-section" id="projects-section">
+        <h2>🔬 Research & Projects</h2>
+        <div id="projects-list"></div>
+    </div>
+
+    <!-- Workshops & Trainings -->
+    <div class="cv-section" id="trainings-section">
+        <h2>📚 Workshops & Trainings</h2>
+        <div id="trainings-list"></div>
+    </div>
+
+    <!-- Skills -->
+    <div class="cv-section">
+        <h2>⚙️ Skills</h2>
+        <div class="skills">
+            <span>ArcGIS / QGIS</span><span>Python</span><span>Machine Learning</span><span>Water Quality Index</span>
+            <span>Flow Modelling</span><span>AutoCAD</span><span>Spatial Analysis</span><span>Remote Sensing</span>
+            <span>Data Visualization</span><span>Environmental Impact Assessment</span><span>Digital Twin Concepts</span>
+        </div>
+    </div>
+</div>
+
+<div class="map-panel">
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+    // --------------------------------------------------------------
+    // 1. Define all events (same data as before, with coordinates)
+    // --------------------------------------------------------------
+    const events = [
+        // --- Work Experience ---
+        { type: 'work', title: 'Assistant Professor', org: 'Kabul University', location: 'Kabul, Afghanistan',
+          start: '2021-01-31', end: '2023-10-03', lat: 34.5553, lng: 69.2075,
+          desc: 'Mentored environmental majors, participated in faculty committees, maintained grading rosters.' },
+        { type: 'work', title: 'Technical Specialist (GIS/Env. Studies)', org: 'APWDO', location: 'Kabul, Afghanistan',
+          start: '2019-11-17', end: '2020-03-31', lat: 34.5553, lng: 69.2075,
+          desc: 'Developed proposals for UNDP/GEF, conducted landscape surveys in 8 provinces, applied GIS for mapping.' },
+        { type: 'work', title: 'Env. Monitoring & Inspection Specialist', org: 'NEPA', location: 'Kabul, Afghanistan',
+          start: '2020-08-01', end: '2020-12-31', lat: 34.5553, lng: 69.2075,
+          desc: 'Supported monitoring directorate, created SOPs, used GIS for pollution source identification.' },
+        { type: 'work', title: 'English Teacher', org: 'ILIKE School', location: 'Astana, Kazakhstan',
+          start: '2015-09-01', end: '2016-08-31', lat: 51.1694, lng: 71.4491,
+          desc: 'Taught English reading, writing, speaking; prepared lesson plans.' },
+        { type: 'work', title: 'TESOL Certified English Teacher', org: 'Arizona State Univ. / Language Academy', location: 'Adana, Turkey',
+          start: '2023', end: '2025', lat: 37.0000, lng: 35.3213,
+          desc: '2 years experience teaching English in Adana; TESOL certification from ASU.' },
+
+        // --- Education ---
+        { type: 'education', title: 'PhD Candidate in Environmental Engineering', org: 'Çukurova University', location: 'Adana, Turkey',
+          start: '2024', end: 'Present', lat: 37.0000, lng: 35.3213,
+          desc: 'Research on water quality, GIS, and AI applications. Supervised by Prof. Recep Yurtal.' },
+        { type: 'education', title: 'M.Tech in Environmental Engineering', org: 'NIT Kurukshetra', location: 'Kurukshetra, India',
+          start: '2017-07-26', end: '2019-07-31', lat: 29.9695, lng: 76.8783,
+          desc: 'CGPA 9.2. Thesis on GIS and air quality.' },
+        { type: 'education', title: 'B.Sc in Civil Engineering', org: 'L.N. Gumilyov Eurasian National University', location: 'Astana, Kazakhstan',
+          start: '2011-08-31', end: '2015-06-30', lat: 51.1694, lng: 71.4491,
+          desc: 'Civil engineering foundation.' },
+        { type: 'education', title: 'Preparatory Course', org: 'Al-Farabi National University', location: 'Almaty, Kazakhstan',
+          start: '2010-09-30', end: '2011-05-31', lat: 43.2220, lng: 76.8512, desc: 'Preparatory studies.' },
+        { type: 'education', title: 'High School Diploma', org: 'Zokor High School', location: 'Imam Sahib, Afghanistan',
+          start: '2005', end: '2010', lat: 37.1862, lng: 68.9104, desc: 'Secondary education.' },
+
+        // --- Publications (as "other" type) ---
+        { type: 'pub', title: 'Groundwater Quality Index of Drinking Water in Kabul City', org: 'Environmental Earth Sciences (Springer)', location: 'Kabul, Afghanistan',
+          start: '2025-10', lat: 34.5553, lng: 69.2075, desc: 'Fazal Rahman Afghan, Recep Yurtal. Vol 84(21). DOI: 10.1007/s12665-025-12658-7' },
+        { type: 'pub', title: 'Urban Development and Waste Management Planning in Kabul New City', org: 'Case Study', location: 'Kabul, Afghanistan',
+          start: '2023', lat: 34.5553, lng: 69.2075, desc: 'Co-authored study on waste management.' },
+        { type: 'pub', title: 'GIS for Spatial and Temporal Analysis of Air Quality Trends in Kabul', org: 'Scopus', location: 'Kabul, Afghanistan',
+          start: '2022', lat: 34.5553, lng: 69.2075, desc: 'Customization of GIS for air quality indices.' },
+        { type: 'pub', title: 'Health Impacts Assessment due to PM2.5, PM10 and NO2 in Delhi', org: 'Scopus', location: 'Delhi, India',
+          start: '2020', lat: 28.6139, lng: 77.2090, desc: 'Health impacts of air pollution in NCT Delhi.' },
+        { type: 'pub', title: 'Predictive Modeling of PM2.5 Using Soft Computing Techniques', org: 'SCI Indexed', location: 'Faridabad, India',
+          start: '2019', lat: 28.4089, lng: 77.3178, desc: 'Case study: Faridabad, Haryana.' },
+
+        // --- Workshops / Trainings ---
+        { type: 'training', title: 'Intellectual Property Rights Workshop', org: 'NIT Kurukshetra', location: 'Kurukshetra, India',
+          start: '2018-09-14', lat: 29.9695, lng: 76.8783, desc: 'One‑day workshop on IPR cell activities.' },
+        { type: 'training', title: 'New Developments in Prefab Structures Workshop', org: 'NIT Kurukshetra', location: 'Kurukshetra, India',
+          start: '2018-11-12', lat: 29.9695, lng: 76.8783, desc: 'Workshop on prefab construction.' },
+        { type: 'training', title: 'Mini‑Model NATO Conference', org: 'Al‑Farabi University', location: 'Almaty, Kazakhstan',
+          start: '2011-04-19', lat: 43.2220, lng: 76.8512, desc: 'International conference on Afghanistan.' }
+    ];
+
+    // Helper: format date range
+    function formatDateRange(start, end) {
+        if (!start) return '';
+        if (end && end !== 'Present') return `${start} – ${end}`;
+        if (end === 'Present') return `${start} – Present`;
+        return start;
+    }
+
+    // Populate left CV sections
+    function populateCV() {
+        // Education (filter type 'education')
+        const eduList = events.filter(e => e.type === 'education');
+        const eduContainer = document.getElementById('education-list');
+        eduContainer.innerHTML = eduList.map(edu => `
+            <div class="cv-item" onclick="zoomTo(${edu.lat}, ${edu.lng})">
+                <h3>${edu.title}</h3>
+                <div class="meta">${edu.org} | ${formatDateRange(edu.start, edu.end)}</div>
+                <p>${edu.desc}</p>
+            </div>
+        `).join('');
+
+        // Work Experience (type 'work')
+        const workList = events.filter(e => e.type === 'work');
+        const workContainer = document.getElementById('work-list');
+        workContainer.innerHTML = workList.map(work => `
+            <div class="cv-item" onclick="zoomTo(${work.lat}, ${work.lng})">
+                <h3>${work.title}</h3>
+                <div class="meta">${work.org} | ${formatDateRange(work.start, work.end)}</div>
+                <p>${work.desc}</p>
+            </div>
+        `).join('');
+
+        // Publications (type 'pub')
+        const pubList = events.filter(e => e.type === 'pub');
+        const pubContainer = document.getElementById('publications-list');
+        pubContainer.innerHTML = pubList.map(pub => `
+            <div class="cv-item" onclick="zoomTo(${pub.lat}, ${pub.lng})">
+                <h3>${pub.title}</h3>
+                <div class="meta">${pub.org} | ${pub.start}</div>
+                <p>${pub.desc}</p>
+            </div>
+        `).join('');
+
+        // Projects (we'll combine some research highlights)
+        const projects = [
+            { title: 'PhD Research: Groundwater Quality & Flow Modelling', loc: 'Adana, Turkey', lat: 37.0, lng: 35.3213, desc: 'Integration of GIS, AI, and digital twin concepts for water resources.' },
+            { title: 'GIS-Based Pollution Source Mapping', loc: 'Kabul, Afghanistan', lat: 34.5553, lng: 69.2075, desc: 'Developed for NEPA to identify industrial pollution sources.' },
+            { title: 'Landscape Surveys for UNDP/GEF', loc: 'Afghanistan', lat: 34.5553, lng: 69.2075, desc: 'Field surveys in 8 provinces for watershed management.' }
+        ];
+        const projContainer = document.getElementById('projects-list');
+        projContainer.innerHTML = projects.map(proj => `
+            <div class="cv-item" onclick="zoomTo(${proj.lat}, ${proj.lng})">
+                <h3>${proj.title}</h3>
+                <div class="meta">${proj.loc}</div>
+                <p>${proj.desc}</p>
+            </div>
+        `).join('');
+
+        // Trainings (type 'training')
+        const trainingList = events.filter(e => e.type === 'training');
+        const trainingContainer = document.getElementById('trainings-list');
+        trainingContainer.innerHTML = trainingList.map(t => `
+            <div class="cv-item" onclick="zoomTo(${t.lat}, ${t.lng})">
+                <h3>${t.title}</h3>
+                <div class="meta">${t.org} | ${t.start}</div>
+                <p>${t.desc}</p>
+            </div>
+        `).join('');
+    }
+
+    // --------------------------------------------------------------
+    // 2. Map initialization with markers and path
+    // --------------------------------------------------------------
+    const map = L.map('map').setView([34.5, 70.0], 5);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; CartoDB',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Marker colors
+    const markerColors = {
+        work: '#2ecc71',
+        education: '#3498db',
+        pub: '#f39c12',
+        training: '#9b59b6'
+    };
+
+    function getIcon(type) {
+        const color = markerColors[type] || '#95a5a6';
+        const emoji = type === 'work' ? '💼' : type === 'education' ? '🎓' : type === 'pub' ? '📄' : '📚';
+        const iconHtml = `<div style="background-color: ${color}; width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; color: white;">${emoji}</div>`;
+        return L.divIcon({ html: iconHtml, iconSize: [28,28], className: 'custom-div-icon', popupAnchor: [0,-12] });
+    }
+
+    const markers = L.markerClusterGroup({ spiderfyOnMaxZoom: true, maxClusterRadius: 40 });
+    events.forEach(ev => {
+        const popupContent = `<div style="max-width: 260px;">
+            <h4 style="margin:0 0 5px;">${ev.title}</h4>
+            <strong>${ev.org}</strong><br><em>${ev.location}</em><br>
+            ${ev.start && ev.end ? `<strong>📅 ${ev.start} – ${ev.end}</strong><br>` : ev.start ? `<strong>📅 ${ev.start}</strong><br>` : ''}
+            <p style="margin-top:6px; font-size:0.85rem;">${ev.desc}</p>
+            <span style="background:${markerColors[ev.type]}; padding:2px 6px; border-radius:12px; font-size:0.7rem; color:white;">${ev.type === 'work' ? '💼 Work' : ev.type === 'education' ? '🎓 Education' : ev.type === 'pub' ? '📄 Publication' : '📚 Training'}</span>
+        </div>`;
+        const marker = L.marker([ev.lat, ev.lng], { icon: getIcon(ev.type) });
+        marker.bindPopup(popupContent);
+        markers.addLayer(marker);
+    });
+    map.addLayer(markers);
+
+    // Chronological path (based on start dates)
+    const chronological = events.map(ev => {
+        let startDate = null;
+        if (ev.start && typeof ev.start === 'string') {
+            if (ev.start.includes('-')) startDate = new Date(ev.start);
+            else if (!isNaN(parseInt(ev.start))) startDate = new Date(parseInt(ev.start), 0, 1);
+        }
+        return { ...ev, startDate };
+    }).filter(ev => ev.startDate && !isNaN(ev.startDate) && ev.type !== 'education' && ev.type !== 'pub') // exclude current? we include all for path
+      .sort((a,b) => a.startDate - b.startDate);
+    const pathPoints = chronological.map(ev => [ev.lat, ev.lng]);
+    // Remove duplicates
+    const unique = [];
+    for (let i=0; i<pathPoints.length; i++) {
+        if (i===0 || pathPoints[i][0]!==pathPoints[i-1][0] || pathPoints[i][1]!==pathPoints[i-1][1]) unique.push(pathPoints[i]);
+    }
+    if (unique.length > 1) {
+        L.polyline(unique, { color: '#2980b9', weight: 3, opacity: 0.7, dashArray: '5, 8' }).addTo(map)
+            .bindTooltip('📅 Chronological career path', { sticky: true });
+    }
+
+    // Legend
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = () => {
+        const div = L.DomUtil.create('div', 'legend');
+        div.style.background = 'white'; div.style.padding = '6px 12px'; div.style.borderRadius = '6px'; div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
+        div.innerHTML = `<div><span style="background:#2ecc71; display:inline-block; width:12px; height:12px; border-radius:50%;"></span> Work</div>
+                         <div><span style="background:#3498db;"></span> Education</div>
+                         <div><span style="background:#f39c12;"></span> Publications</div>
+                         <div><span style="background:#9b59b6;"></span> Trainings</div>
+                         <div><hr style="margin:4px 0"><span style="background:#2980b9; width:12px; height:3px; display:inline-block;"></span> Career path</div>`;
+        return div;
+    };
+    legend.addTo(map);
+    L.control.scale({ metric: true, imperial: false }).addTo(map);
+
+    // Zoom function called from CV items
+    window.zoomTo = function(lat, lng) {
+        map.setView([lat, lng], 10);
+    };
+
+    // Populate left CV after page load
+    populateCV();
+</script>
+</body>
+</html>
